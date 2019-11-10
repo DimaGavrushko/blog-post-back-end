@@ -5,5 +5,5 @@ if [ "$TRAVIS_BRANCH" = "master" ]; then
 else
     TAG="$TRAVIS_BRANCH"
 fi
-docker build -t $DOCKER_USER/$DOCKER_BACK_END_IMAGE:$TAG .
+docker build -t $DOCKER_USER/$DOCKER_BACK_END_IMAGE:$TAG ../
 docker push $DOCKER_USER/$DOCKER_BACK_END_IMAGE:$TAG
