@@ -9,4 +9,4 @@ script:
 - npm test
 
 after_success:
-- sh ./travis/deploy_dockerhub.sh
+- sh travis/deploy_dockerhub.sh
