@@ -1,28 +1,26 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const MongoClient = require('mongodb').MongoClient;
 const app = express();
 const config = require("./config");
-/*mongoose.connect(`mongodb+srv://admin:admin@cluster0-jnotm.mongodb.net/test?retryWrites=true&w=majority`, {
+
+const uri = `mongodb+srv://${config.dbUser}:${config.dbUserPassword}@cluster0-jnotm.mongodb.net/${config.dbName}?retryWrites=true&w=majority`;
+
+mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log("Successfully connected to database"));*/
+}).then(() => {
+    console.log("Successfully connected to database");
 
-const uri = `mongodb+srv://${config.dbUser}:${config.dbUserPassword}@cluster0-jnotm.mongodb.net/test?retryWrites=true&w=majority`;
-MongoClient.connect(uri, function(err, client) {
-    if(err) {
-        console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
-    }
-    console.log('Connected...');
-    const collection = client.db(config.db).collection("posts");
-    console.log(collection);
-    // perform actions on the collection object
-    client.close();
+    // Example of using mongoose
+    /*const schema = new mongoose.Schema({name: String, id: Number});
+    const Post = mongoose.model('Post', schema);
+    Post.find({}).then( res => console.log(res))*/
 });
+
 
 app.get('/', (req, res) => {
-    res.send("Hello world");
+    res.send("Hello world.");
 });
-app.listen(process.env.PORT || 8001, () => {
+app.listen(config.port, () => {
     console.log("Server is started")
 });
