@@ -9,4 +9,4 @@ script:
 - npm test
 
 after_success:
-- sh .travis/deploy_dockerhub.sh
+- test “$TRAVIS_BRANCH” = “master” && bash .travis/deploy_heroku.sh
