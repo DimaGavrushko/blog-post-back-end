@@ -1,9 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+const cors = require("cors");
 const config = require("./config");
-const schema = new mongoose.Schema({name: String, id: Number});
-const Post = mongoose.model('Post', schema);
+
+app.use(cors());
 
 const uri = `mongodb+srv://${config.dbUser}:${config.dbUserPassword}@cluster0-jnotm.mongodb.net/${config.dbName}?retryWrites=true&w=majority`;
 
