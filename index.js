@@ -6,6 +6,9 @@ const config = require("./config");
 
 app.use(cors());
 
+const schema = new mongoose.Schema({name: String, id: Number});
+const Post = mongoose.model('Post', schema);
+
 const uri = `mongodb+srv://${config.dbUser}:${config.dbUserPassword}@cluster0-jnotm.mongodb.net/${config.dbName}?retryWrites=true&w=majority`;
 
 mongoose.connect(uri, {
