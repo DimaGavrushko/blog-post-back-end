@@ -4,8 +4,15 @@ const app = express();
 const cors = require("cors");
 const config = require("./config");
 
+const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https:\/\/blogpost-bsu\.herokuapp\.com$/;
 const corsOptions = {
-    origin: [/^http:\/\/localhost:[0-9]{4}$/, "https://blogpost-bsu.herokuapp.com/"]
+    origin: function (origin, callback) {
+        if (origin.search(whitelist) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
 };
 
 app.use(cors(corsOptions));
