@@ -4,7 +4,11 @@ const app = express();
 const cors = require("cors");
 const config = require("./config");
 
-app.use(cors());
+const corsOptions = {
+    origin: [/^http:\/\/localhost:[0-9]{4}$/, "https://blogpost-bsu.herokuapp.com/"]
+};
+
+app.use(cors(corsOptions));
 
 const schema = new mongoose.Schema({name: String, id: Number});
 const Post = mongoose.model('Post', schema);
