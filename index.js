@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 const config = require("./config");
 
-const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https:\/\/blogpost-bsu\.herokuapp\.com$/;
+const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https?:\/\/blogpost-bsu\.herokuapp\.com$/;
 const corsOptions = {
     origin: function (origin, callback) {
         if (origin.search(whitelist) !== -1) {
