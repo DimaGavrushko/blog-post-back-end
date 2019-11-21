@@ -1,1 +1,1 @@
-https://api-blogpost.herokuapp.com/
+http://api-blogpost.herokuapp.com/
