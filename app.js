@@ -2,14 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const config = require("./config");
+const bodyParser = require('body-parser');
 
-const salt = bcrypt.genSaltSync(10);
-const secret = 'mysecretsshhh';
-const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https?:\/\/blogpost-bsu\.herokuapp\.com$/;
+const User = require("./models/user");
+const config = require("./config");
+const { withAuth } = require("./middlewares");
+
+/*const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https?:\/\/blogpost-bsu\.herokuapp\.com$/;
 const corsOptions = {
     origin: function (origin, callback) {
         if (origin.search(whitelist) !== -1) {
@@ -20,70 +21,20 @@ const corsOptions = {
     }
 };
 
-app.use(cookieParser());
-app.use(cors(corsOptions));
+app.use(cors(corsOptions));*/
 
-const schema = new mongoose.Schema({name: String, id: Number});
-const Post = mongoose.model('Post', schema);
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+
 
 const uri = `mongodb+srv://${config.dbUser}:${config.dbUserPassword}@cluster0-jnotm.mongodb.net/${config.dbName}?retryWrites=true&w=majority`;
 
 mongoose.connect(uri, {
+    useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log("Successfully connected to database"));
-
-const withAuth = function(req, res, next) {
-    const token = req.cookies.token;
-    if (!token) {
-        res.status(401).send('Unauthorized: No token provided');
-    } else {
-        jwt.verify(token, secret, function(err, decoded) {
-            if (err) {
-                res.status(401).send('Unauthorized: Invalid token');
-            } else {
-                req.email = decoded.email;
-                next();
-            }
-        });
-    }
-};
-
-const UserSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, required: true }
-});
-
-UserSchema.pre('save', function(next) {
-    // Check if document is new or a new password has been set
-    if (this.isNew || this.isModified('password')) {
-        // Saving reference to this because of changing scopes
-        const document = this;
-        bcrypt.hash(document.password, salt,
-          function(err, hashedPassword) {
-              if (err) {
-                  next(err);
-              }
-              else {
-                  document.password = hashedPassword;
-                  next();
-              }
-          });
-    } else {
-        next();
-    }
-});
-
-UserSchema.methods.isCorrectPassword = function(password, callback){
-    bcrypt.compare(password, this.password, function(err, same) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(err, same);
-        }
-    });
-};
 
 app.post('/auth', function(req, res) {
     const { email, password } = req.body;
@@ -114,7 +65,7 @@ app.post('/auth', function(req, res) {
                 } else {
                     // Issue token
                     const payload = { user };
-                    const token = jwt.sign(payload, secret, {
+                    const token = jwt.sign(payload, config.secret, {
                         expiresIn: '1h'
                     });
                     res.cookie('token', token, { httpOnly: true })
@@ -130,24 +81,24 @@ app.get('/checkToken', withAuth, function(req, res) {
     res.sendStatus(200);
 });
 
-/*app.post('/api/register', function(req, res) {
-    const { email, password } = req.body;
-    const user = new User({ email, password });
+app.post('/register', function(req, res) {
+    const { email, password, role } = req.body;
+    const user = new User({ email, password, role });
     user.save(function(err) {
         if (err) {
             res.status(500)
-              .send("Error registering new user please try again.");
+              .send(err.message);
         } else {
-            res.status(200).send("Welcome to the club!");
+            res.status(200).send("Success");
         }
     });
-});*/
+});
 
 app.get('/', (req, res) => {
     Post.find({}).then(result => res.json({ posts: result}));
 });
 
-app.get('/api/secret', function(req, res) {
+app.get('/secret', withAuth, function(req, res) {
     res.send('The password is potato');
 });
 
