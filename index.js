@@ -2,11 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const config = require("./config");
 
+const salt = bcrypt.genSaltSync(10);
 const secret = 'mysecretsshhh';
 const whitelist = /^http:\/\/localhost:[0-9]{4}$|^https?:\/\/blogpost-bsu\.herokuapp\.com$/;
 const corsOptions = {
@@ -59,7 +60,7 @@ UserSchema.pre('save', function(next) {
     if (this.isNew || this.isModified('password')) {
         // Saving reference to this because of changing scopes
         const document = this;
-        bcrypt.hash(document.password, saltRounds,
+        bcrypt.hash(document.password, salt,
           function(err, hashedPassword) {
               if (err) {
                   next(err);
