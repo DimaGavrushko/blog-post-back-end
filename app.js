@@ -21,7 +21,8 @@ app.use(cors({
         } else {
             callback(new Error('Not allowed by CORS'))
         }
-    }
+    },
+    credentials: true
 }));
 
 app.use('/', router);
