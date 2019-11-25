@@ -8,11 +8,11 @@ router.get('/:id', (req, res) => {
     if (obj) {
       const user = _.omit(obj.toObject(), ["password", "__v"]);
       res.json(user)
+    } else {
+      res.status(404).json({
+        error: 'Not found such user'
+      })
     }
-
-    res.status(404).json({
-      error: 'Not found such user'
-    })
   })
     .catch(err => {
       res.status(404).json({
