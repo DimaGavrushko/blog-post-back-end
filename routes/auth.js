@@ -35,13 +35,11 @@ router.post('/login', function(req, res) {
             });
         } else {
           // Issue token
-          const payload = { user };
+          const payload = { email };
           const token = jwt.sign(payload, secret, {
             expiresIn: '1h'
           });
-          res.cookie('token', token, { httpOnly: true })
-            .status(200)
-            .json(user)
+          res.status(200).cookie('token', token, { httpOnly: true }).json(user)
         }
       });
     }
@@ -65,6 +63,23 @@ router.post('/register', function(req, res) {
 
 router.get('/checkToken', withAuth, function(req, res) {
   res.sendStatus(200);
+});
+
+router.get('/logout', withAuth, function(req, res) {
+  res.cookie('token', null, { httpOnly: true }).sendStatus(200);
+});
+
+
+router.get('/tryAuth', withAuth, function(req, res) {
+  User.findOne({ email: req.email }, function (err, user) {
+    if (err) {
+      res.status(500)
+        .json({
+          error: 'Internal error please try again'
+        });
+    }
+    res.status(200).json(user)
+  });
 });
 
 module.exports = router;
