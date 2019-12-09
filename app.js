@@ -17,16 +17,16 @@ dbService.connect(dbUser, dbUserPassword, dbName).then(console.log);
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: function (origin, callback) {
-        if (origin && origin.search(allowedOrigins) !== -1) {
-            callback(null, true)
-        } else {
-            callback(new Error('Not allowed by CORS'))
-        }
-    },
-    credentials: true
-}));
+// app.use(cors({
+//     origin: function (origin, callback) {
+//         if (origin && origin.search(allowedOrigins) !== -1) {
+//             callback(null, true)
+//         } else {
+//             callback(new Error('Not allowed by CORS'))
+//         }
+//     },
+//     credentials: true
+// }));
 app.use('/', router);
 
 app.listen(port, () => console.log("Server is started on " + port));
