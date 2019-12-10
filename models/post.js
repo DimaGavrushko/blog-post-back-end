@@ -25,15 +25,22 @@ const PostSchema = new mongoose.Schema({
     },
     likes: {
         type: Number,
-        default: 0
+        default: 0,
+        required: true,
     },
     dislikes: {
         type: Number,
-        default: 0
+        default: 0,
+        required: true,
     },
     isApproved: {
         type: Boolean,
-        default: false
+        default: false,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        required: true
     }
 });
 
