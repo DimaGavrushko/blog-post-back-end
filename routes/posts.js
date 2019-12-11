@@ -52,7 +52,7 @@ router.get('/categories', async (req, res) => {
 
 router.put('/createPost', upload.single('img'), async (req, res) => {
     console.log(req.body, req.file);
-    res.sendStatus(200);
+    res.json("Post successfully added");
 });
 
 module.exports = router;
