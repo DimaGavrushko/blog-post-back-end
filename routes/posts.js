@@ -5,7 +5,7 @@ const postService = require('../services/post');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, __dirname + '/../uploads');
+        cb(null, __dirname + '/../uploads/tmp');
     },
     filename: (req, file, cb) => {
         cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`);
