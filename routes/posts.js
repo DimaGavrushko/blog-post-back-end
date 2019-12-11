@@ -1,6 +1,18 @@
 const router = require('express').Router();
+const multer  = require('multer');
 const Post = require('../models/post');
 const postService = require('../services/post');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __dirname + '/../uploads');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`);
+    },
+});
+
+const upload = multer({storage: storage});
 
 router.get('/approved', async (req, res) => {
     try {
@@ -36,6 +48,11 @@ router.get('/categories', async (req, res) => {
                 error: err.message
             });
     }
+});
+
+router.put('/createPost', upload.single('img'), async (req, res) => {
+    console.log(req.body, req.file);
+    res.sendStatus(200);
 });
 
 module.exports = router;
