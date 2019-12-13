@@ -10,9 +10,7 @@ const S3Service = require("./services/s3");
 const { dbName, dbUser, dbUserPassword, s3BucketName, s3AccessKey, s3SecretKey, port } = require("./config");
 const { allowedOrigins } = require("./constants");
 
-const s3Service = new S3Service(s3AccessKey, s3SecretKey, s3BucketName);
-
-s3Service.connect();
+S3Service.connect(s3AccessKey, s3SecretKey, s3BucketName);
 dbService.connect(dbUser, dbUserPassword, dbName).then(console.log);
 
 app.use(bodyParser.json());

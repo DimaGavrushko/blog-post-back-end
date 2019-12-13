@@ -4,8 +4,7 @@ const ObjectId = mongoose.ObjectId;
 const PostSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     content: {
         type: String,
@@ -24,13 +23,13 @@ const PostSchema = new mongoose.Schema({
         required: true
     },
     likes: {
-        type: Number,
-        default: 0,
+        type: [ObjectId],
+        default: [],
         required: true,
     },
     dislikes: {
-        type: Number,
-        default: 0,
+        type: [ObjectId],
+        default: [],
         required: true,
     },
     isApproved: {
@@ -41,6 +40,10 @@ const PostSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         required: true
+    },
+    authorName: {
+        type: String,
+        required: true,
     }
 });
 
