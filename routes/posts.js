@@ -145,7 +145,7 @@ router.post('/dislike', async (req, res) => {
 router.post('/undislike', async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
-        post.dislikes = post.likes.filter(elem => {
+        post.dislikes = post.dislikes.filter(elem => {
             return !elem.equals(req.body.userId);
         });
         await post.save();
