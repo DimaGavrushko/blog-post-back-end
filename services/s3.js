@@ -30,7 +30,8 @@ module.exports = (function () {
       const params = {
         Bucket: bucketName,
         Body: fileData,
-        Key: `${directory}/${fileName}`
+        Key: `${directory}/${fileName}`,
+        ACL: 'public-read'
       };
 
       const result = await s3.upload(params).promise();
