@@ -88,4 +88,64 @@ router.put('/createPost', upload.single('img'), async (req, res) => {
     }
 });
 
+router.post('/like', async (req, res) => {
+    try {
+        let post = await Post.findOne({_id: req.body.postId});
+        post.likes.push(req.body.userId);
+        await post.save();
+        res.status(200).json(post);
+    } catch (e) {
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
+router.post('/unlike', async (req, res) => {
+    try {
+        let post = await Post.findOne({_id: req.body.postId});
+        post.likes = post.likes.filter(elem => {
+            return !elem.equals(req.body.userId);
+        });
+        await post.save();
+        res.status(200).json(post);
+    } catch (e) {
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
+router.post('/dislike', async (req, res) => {
+    try {
+        let post = await Post.findOne({_id: req.body.postId});
+        post.dislikes.push(req.body.userId);
+        await post.save();
+        res.status(200).json(post);
+    } catch (e) {
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
+router.post('/undislike', async (req, res) => {
+    try {
+        let post = await Post.findOne({_id: req.body.postId});
+        post.dislikes = post.likes.filter(elem => {
+            return !elem.equals(req.body.userId);
+        });
+        await post.save();
+        res.status(200).json(post);
+    } catch (e) {
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
 module.exports = router;
