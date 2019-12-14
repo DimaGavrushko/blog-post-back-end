@@ -155,7 +155,18 @@ router.post('/approve', async (req, res) => {
         });
         res.status(200).json(true);
     } catch (e) {
-        console.log(e);
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
+router.delete('/', async (req, res) => {
+    try {
+        let result = await Post.deleteOne({_id: req.body.postId});
+        res.status(200).json(true);
+    } catch (e) {
         res.status(400)
             .json({
                 error: 'Bad request'
