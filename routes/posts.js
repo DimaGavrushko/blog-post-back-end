@@ -54,15 +54,21 @@ router.get('/categories', async (req, res) => {
 router.put('/createPost', upload.single('img'), async (req, res) => {
     try {
         let post = null;
-        let filePath = '';
+        let filePath = null;
         if (req.body.id !== '') {
-            filePath = await S3Service.upload('posts', req.file.path, req.file.filename);
-            await Post.updateOne({_id: req.body.id}, {
+            if (req.file) {
+                filePath = await S3Service.upload('posts', req.file.path, req.file.filename);
+            }
+            let params = {
                 ...req.body,
                 isApproved: false,
-                url: filePath,
                 createdAt: new Date()
-            });
+            };
+
+            if (filePath) {
+                params.url = filePath;
+            }
+            await Post.updateOne({_id: req.body.id}, params);
             post = await Post.findOne({_id: req.body.id});
         } else {
             console.log(req.body, req.file);
