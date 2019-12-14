@@ -148,4 +148,19 @@ router.post('/undislike', async (req, res) => {
     }
 });
 
+router.post('/approve', async (req, res) => {
+    try {
+        let result = await Post.updateOne({_id: req.body.postId}, {
+            isApproved: true
+        });
+        res.status(200).json(true);
+    } catch (e) {
+        console.log(e);
+        res.status(400)
+            .json({
+                error: 'Bad request'
+            });
+    }
+});
+
 module.exports = router;
