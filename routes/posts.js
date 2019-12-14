@@ -97,7 +97,9 @@ router.put('/createPost', upload.single('img'), async (req, res) => {
 router.post('/like', async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
-        post.likes.push(req.body.userId);
+        if (post.likes.includes(req.body.userId)) {
+            post.likes.push(req.body.userId);
+        }
         await post.save();
         res.status(200).json(post);
     } catch (e) {
@@ -127,7 +129,9 @@ router.post('/unlike', async (req, res) => {
 router.post('/dislike', async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
-        post.dislikes.push(req.body.userId);
+        if (post.dislikes.includes(req.body.userId)) {
+            post.dislikes.push(req.body.userId);
+        }
         await post.save();
         res.status(200).json(post);
     } catch (e) {
