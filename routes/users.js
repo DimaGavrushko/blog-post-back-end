@@ -81,6 +81,24 @@ router.post('/updatePassword', withAuth, async (req, res) => {
         if (req.userId !== userId) {
             res.status(403).json(false);
         }
+        let user = await Users.findOne({_id: userId});
+        user.isCorrectPassword(currentPassword, async function (err, same) {
+            if (err) {
+                res.status(500)
+                    .json({
+                        error: 'Internal error please try again'
+                    });
+            } else if (!same) {
+                res.status(400)
+                    .json({
+                        error: 'Incorrect current password'
+                    });
+            } else {
+                const saltPassword = await user.encodePassword(newPassword);
+                await Users.updateOne({_id: userId}, {password: saltPassword});
+                res.status(200).json(true);
+            }
+        });
     } catch (e) {
         console.log(e);
         res.status(400)
