@@ -1,20 +1,9 @@
 const router = require('express').Router();
-const multer = require('multer');
 const Post = require('../models/post');
 const postService = require('../services/post');
 const S3Service = require('../services/s3');
 const {withAuth} = require("../middlewares");
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, __dirname + '/../uploads/tmp');
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`);
-    },
-});
-
-const upload = multer({storage: storage});
+const multerService = require('../services/multer');
 
 router.get('/approved', async (req, res) => {
     try {
@@ -52,7 +41,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-router.put('/createPost', withAuth, upload.single('img'), async (req, res) => {
+router.put('/createPost', withAuth, multerService.upload.single('img'), async (req, res) => {
     try {
         let post = null;
         let s3Params = {};

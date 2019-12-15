@@ -17,7 +17,11 @@ const UserSchema = new mongoose.Schema({
     },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    url: { type: String, required: true },
+    url: { type: String },
+    s3Key: {
+        type: String,
+        required: true
+    },
     description: { type: String, required: true }
 });
 
