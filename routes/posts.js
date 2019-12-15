@@ -55,27 +55,28 @@ router.get('/categories', async (req, res) => {
 router.put('/createPost', withAuth, upload.single('img'), async (req, res) => {
     try {
         let post = null;
-        let filePath = null;
+        let s3Params = {};
         if (req.body.id !== '') {
+            post = await Post.findOne({_id: req.body.id});
             if (req.file) {
-                filePath = await S3Service.upload('posts', req.file.path, req.file.filename);
+                s3Params = await S3Service.upload('posts', req.file.path, req.file.filename);
+                await S3Service.deleteImg(post.s3Key);
             }
             let params = {
                 ...req.body,
                 isApproved: false,
-                createdAt: new Date()
+                createdAt: new Date(),
+                ...s3Params
             };
 
-            if (filePath) {
-                params.url = filePath;
-            }
+            post = {...post, ...params};
+            console.log(post);
             await Post.updateOne({_id: req.body.id}, params);
-            post = await Post.findOne({_id: req.body.id});
         } else {
             console.log(req.body, req.file);
-            filePath = await S3Service.upload('posts', req.file.path, req.file.filename);
+            s3Params = await S3Service.upload('posts', req.file.path, req.file.filename);
             post = new Post({
-                url: filePath,
+                ...s3Params,
                 title: req.body.title,
                 categoryId: req.body.categoryId,
                 content: req.body.content,
@@ -176,9 +177,12 @@ router.post('/approve', withAuth, async (req, res) => {
 
 router.delete('/', withAuth, async (req, res) => {
     try {
-        let result = await Post.deleteOne({_id: req.body.postId});
+        let post = await Post.findOne({_id: req.body.postId});
+        await S3Service.deleteImg(post.s3Key);
+        await post.delete();
         res.status(200).json(true);
     } catch (e) {
+        console.log(e);
         res.status(400)
             .json({
                 error: 'Bad request'
