@@ -15,9 +15,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['admin', 'journalist', 'user'],
         required: true
     },
-    first: { type: String, required: true },
-    last: { type: String, required: true },
-    url: { type: String, required: true }
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    url: { type: String, required: true },
+    description: { type: String, required: true }
 });
 
 UserSchema.pre('save', function(next) {

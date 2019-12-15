@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Users = require('../models/user');
+const {withAuth} = require("../middlewares");
 
 const _ = require('lodash');
 
@@ -19,6 +20,25 @@ router.get('/:id', (req, res) => {
         error: err.message
       })
     });
+});
+
+router.post('/updateProfile', withAuth, async (req, res) => {
+  try {
+    let params = req.body;
+    let newParams = {
+      [params.name]: params.value
+    };
+    let result = await Users.updateOne({_id: params.userId}, {
+      [params.name]: params.value
+    });
+    res.status(200).json(true);
+  } catch (e) {
+    console.log(e);
+    res.status(400)
+        .json({
+          error: 'Bad request'
+        });
+  }
 });
 
 module.exports = router;
