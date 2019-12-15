@@ -3,6 +3,7 @@ const Users = require('../models/user');
 const {withAuth} = require("../middlewares");
 const multerService = require('../services/multer');
 const S3Service = require('../services/s3');
+const Post = require('../models/post');
 
 const _ = require('lodash');
 
@@ -30,6 +31,13 @@ router.post('/updateProfile', withAuth, async (req, res) => {
     let result = await Users.updateOne({_id: params.userId}, {
       [params.name]: params.value
     });
+
+    if (params.name === 'firstName') {
+      await Post.updateMany({authorId: params.userId}, {
+        authorName: params.value
+      });
+    }
+
     const updatedUser = await  Users.findOne({_id: params.userId});
     res.status(200).json(updatedUser);
   } catch (e) {
@@ -51,7 +59,7 @@ router.post('/updateAvatar', withAuth, multerService.upload.single('img'), async
     let s3Params = await S3Service.upload('avatars', req.file.path, req.file.filename);
     await Users.updateOne({_id: req.body.userId}, s3Params);
 
-    res.status(200).json(true);
+    res.status(200).json(Object.assign(user, s3Params));
   } catch (e) {
     console.log(e);
     res.status(400)

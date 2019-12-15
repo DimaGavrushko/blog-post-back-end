@@ -58,8 +58,7 @@ router.put('/createPost', withAuth, multerService.upload.single('img'), async (r
                 ...s3Params
             };
 
-            post = {...post, ...params};
-            console.log(post);
+            post = Object.assign(post, params);
             await Post.updateOne({_id: req.body.id}, params);
         } else {
             console.log(req.body, req.file);
