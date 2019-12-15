@@ -3,6 +3,7 @@ const multer = require('multer');
 const Post = require('../models/post');
 const postService = require('../services/post');
 const S3Service = require('../services/s3');
+const {withAuth} = require("../middlewares");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -27,7 +28,7 @@ router.get('/approved', async (req, res) => {
     }
 });
 
-router.get('/notApproved', async (req, res) => {
+router.get('/notApproved', withAuth, async (req, res) => {
     try {
         const posts = await postService.getNotApprovedPosts();
         res.status(200).json(posts);
@@ -51,7 +52,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-router.put('/createPost', upload.single('img'), async (req, res) => {
+router.put('/createPost', withAuth, upload.single('img'), async (req, res) => {
     try {
         let post = null;
         let filePath = null;
@@ -94,7 +95,7 @@ router.put('/createPost', upload.single('img'), async (req, res) => {
     }
 });
 
-router.post('/like', async (req, res) => {
+router.post('/like', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
         if (!post.likes.includes(req.body.userId)) {
@@ -103,6 +104,7 @@ router.post('/like', async (req, res) => {
         await post.save();
         res.status(200).json(post);
     } catch (e) {
+        console.log(e);
         res.status(400)
             .json({
                 error: 'Bad request'
@@ -110,7 +112,7 @@ router.post('/like', async (req, res) => {
     }
 });
 
-router.post('/unlike', async (req, res) => {
+router.post('/unlike', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
         post.likes = post.likes.filter(elem => {
@@ -126,7 +128,7 @@ router.post('/unlike', async (req, res) => {
     }
 });
 
-router.post('/dislike', async (req, res) => {
+router.post('/dislike', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
         if (!post.dislikes.includes(req.body.userId)) {
@@ -142,7 +144,7 @@ router.post('/dislike', async (req, res) => {
     }
 });
 
-router.post('/undislike', async (req, res) => {
+router.post('/undislike', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
         post.dislikes = post.dislikes.filter(elem => {
@@ -158,7 +160,7 @@ router.post('/undislike', async (req, res) => {
     }
 });
 
-router.post('/approve', async (req, res) => {
+router.post('/approve', withAuth, async (req, res) => {
     try {
         let result = await Post.updateOne({_id: req.body.postId}, {
             isApproved: true
@@ -172,7 +174,7 @@ router.post('/approve', async (req, res) => {
     }
 });
 
-router.delete('/', async (req, res) => {
+router.delete('/', withAuth, async (req, res) => {
     try {
         let result = await Post.deleteOne({_id: req.body.postId});
         res.status(200).json(true);
