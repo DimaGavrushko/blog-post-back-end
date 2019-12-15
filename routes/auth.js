@@ -26,7 +26,7 @@ router.post('/login', async function (req, res) {
                         });
                 } else {
                     // Issue token
-                    const payload = {email};
+                    const payload = {id: user._id, email, role: user.role};
                     const token = jwt.sign(payload, secret, {
                         expiresIn: '1h'
                     });
