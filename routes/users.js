@@ -25,13 +25,11 @@ router.get('/:id', (req, res) => {
 router.post('/updateProfile', withAuth, async (req, res) => {
   try {
     let params = req.body;
-    let newParams = {
-      [params.name]: params.value
-    };
     let result = await Users.updateOne({_id: params.userId}, {
       [params.name]: params.value
     });
-    res.status(200).json(true);
+    const updatedUser = await  Users.findOne({_id: params.userId});
+    res.status(200).json(updatedUser);
   } catch (e) {
     console.log(e);
     res.status(400)
