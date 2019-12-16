@@ -9,28 +9,32 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    password: { type: String, required: true },
+    password: {type: String, required: true},
     role: {
         type: String,
         enum: ['admin', 'journalist', 'user'],
         required: true
     },
-    first: { type: String, required: true },
-    last: { type: String, required: true },
-    url: { type: String, required: true }
+    firstName: {type: String, required: true},
+    lastName: {type: String, required: true},
+    url: {type: String},
+    s3Key: {
+        type: String,
+        required: true
+    },
+    description: {type: String, required: true}
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
     // Check if document is new or a new password has been set
     if (this.isNew || this.isModified('password')) {
         // Saving reference to this because of changing scopes
         const document = this;
         bcrypt.hash(document.password, salt,
-            function(err, hashedPassword) {
+            function (err, hashedPassword) {
                 if (err) {
                     next(err);
-                }
-                else {
+                } else {
                     document.password = hashedPassword;
                     next();
                 }
@@ -40,14 +44,18 @@ UserSchema.pre('save', function(next) {
     }
 });
 
-UserSchema.methods.isCorrectPassword = function(password, callback){
-    bcrypt.compare(password, this.password, function(err, same) {
+UserSchema.methods.isCorrectPassword = function (password, callback) {
+    bcrypt.compare(password, this.password, function (err, same) {
         if (err) {
             callback(err);
         } else {
             callback(err, same);
         }
     });
+};
+
+UserSchema.methods.encodePassword = async function (password) {
+    return await bcrypt.hash(password, salt);
 };
 
 module.exports = mongoose.model('User', UserSchema);

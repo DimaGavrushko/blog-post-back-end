@@ -1,37 +1,65 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
+const fileSystem = require('./file-system');
+const util = require('util');
 
-class S3Service {
+module.exports = (function () {
 
-  constructor(accessKeyId, secretAccessKey, bucketName) {
-    this.accessKeyId = accessKeyId;
-    this.secretAccessKey = secretAccessKey;
-    this.bucketName = bucketName;
-    this.s3 = null;
-  }
+    let s3 = null;
+    let bucketName;
 
-  connect() {
-    try {
-      AWS.config.update({
-        accessKeyId: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
-      });
-      this.s3 = new AWS.S3();
+    function connect(accessKeyId, secretAccessKey, _bucketName) {
+        try {
+            AWS.config.update({
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey
+            });
+            bucketName = _bucketName;
+            s3 = new AWS.S3();
+            console.log('connected to s3');
+        } catch (err) {
+            console.log(err);
+        }
 
-    } catch (err) {}
+    }
 
-  }
+    async function upload(directory, path, fileName) {
+        try {
+            const fileData = await fileSystem.readFile(path);
+            const params = {
+                Bucket: bucketName,
+                Body: fileData,
+                Key: `${directory}/${fileName}`,
+                ACL: 'public-read-write'
+            };
+            const result = await s3.upload(params).promise();
+            await fileSystem.deleteFile(path);
+            return {
+                url: result.Location,
+                s3Key: result.Key
+            };
 
-  /*async upload() {
-    const params = {
-      Bucket: this.bucketName,
-      Body: fs.createReadStream(__dirname + '/../files/download.jpeg'),
-      Key: "avatars/" + Date.now() + "_" + path.basename('../files/download.jpeg')
-    };
-    console.log(await this.s3.upload(params).promise());
-  }*/
+        } catch (e) {
+            throw e;
+        }
+    }
 
-}
+    async function deleteImg(s3Key) {
+        try {
+            const params = {
+                Bucket: bucketName,
+                Key: s3Key
+            };
+            let res = await s3.deleteObject(params).promise();
+        } catch (e) {
+            throw e;
+        }
+    }
 
-module.exports = S3Service;
+    return {
+        connect,
+        upload,
+        deleteImg
+    }
+})();
