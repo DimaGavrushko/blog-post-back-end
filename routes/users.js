@@ -27,22 +27,27 @@ router.get('/:id', (req, res) => {
 
 router.post('/updateProfile', withAuth, async (req, res) => {
     try {
-        if (req.userId !== req.body.userId || req.role !== 'admin') {
+        if (req.userId !== req.body.userId && req.role !== 'admin') {
             res.status(403).json(false);
         } else {
             let params = req.body;
-            let result = await Users.updateOne({_id: params.userId}, {
-                [params.name]: params.value
-            });
 
-            if (params.name === 'firstName') {
-                await Post.updateMany({authorId: params.userId}, {
-                    authorName: params.value
+            if (params.name === 'email' && req.role === 'admin') {
+                res.status(403).json(false);
+            } else {
+                let result = await Users.updateOne({_id: params.userId}, {
+                    [params.name]: params.value
                 });
-            }
 
-            const updatedUser = await Users.findOne({_id: params.userId});
-            res.status(200).json(updatedUser);
+                if (params.name === 'firstName') {
+                    await Post.updateMany({authorId: params.userId}, {
+                        authorName: params.value
+                    });
+                }
+
+                const updatedUser = await Users.findOne({_id: params.userId});
+                res.status(200).json(updatedUser);
+            }
         }
     } catch (e) {
         console.log(e);
@@ -55,7 +60,7 @@ router.post('/updateProfile', withAuth, async (req, res) => {
 
 router.post('/updateAvatar', withAuth, multerService.upload.single('img'), async (req, res) => {
     try {
-        if (req.userId !== req.body.userId || req.role !== 'admin') {
+        if (req.userId !== req.body.userId && req.role !== 'admin') {
             res.status(403).json(false);
         } else {
             let user = await Users.findOne({_id: req.body.userId});
