@@ -19,12 +19,8 @@ router.get('/approved', async (req, res) => {
 
 router.get('/notApproved', withAuth, async (req, res) => {
     try {
-        if (req.role !== 'admin') {
-            res.status(403).json(false);
-        } else {
-            const posts = await postService.getNotApprovedPosts();
-            res.status(200).json(posts);
-        }
+        const posts = await postService.getNotApprovedPosts();
+        res.status(200).json(posts);
     } catch (err) {
         res.status(500)
             .json({
