@@ -21,9 +21,10 @@ router.get('/notApproved', withAuth, async (req, res) => {
     try {
         if (req.role !== 'admin') {
             res.status(403).json(false);
+        } else {
+            const posts = await postService.getNotApprovedPosts();
+            res.status(200).json(posts);
         }
-        const posts = await postService.getNotApprovedPosts();
-        res.status(200).json(posts);
     } catch (err) {
         res.status(500)
             .json({
@@ -91,13 +92,14 @@ router.post('/like', withAuth, async (req, res) => {
     try {
         if (req.userId !== req.body.userId) {
             res.status(403).json(false);
+        } else {
+            let post = await Post.findOne({_id: req.body.postId});
+            if (!post.likes.includes(req.body.userId)) {
+                post.likes.push(req.body.userId);
+            }
+            await post.save();
+            res.status(200).json(post);
         }
-        let post = await Post.findOne({_id: req.body.postId});
-        if (!post.likes.includes(req.body.userId)) {
-            post.likes.push(req.body.userId);
-        }
-        await post.save();
-        res.status(200).json(post);
     } catch (e) {
         console.log(e);
         res.status(400)
@@ -111,13 +113,14 @@ router.post('/unlike', withAuth, async (req, res) => {
     try {
         if (req.userId !== req.body.userId) {
             res.status(403).json(false);
+        } else {
+            let post = await Post.findOne({_id: req.body.postId});
+            post.likes = post.likes.filter(elem => {
+                return !elem.equals(req.body.userId);
+            });
+            await post.save();
+            res.status(200).json(post);
         }
-        let post = await Post.findOne({_id: req.body.postId});
-        post.likes = post.likes.filter(elem => {
-            return !elem.equals(req.body.userId);
-        });
-        await post.save();
-        res.status(200).json(post);
     } catch (e) {
         res.status(400)
             .json({
@@ -130,13 +133,14 @@ router.post('/dislike', withAuth, async (req, res) => {
     try {
         if (req.userId !== req.body.userId) {
             res.status(403).json(false);
+        } else {
+            let post = await Post.findOne({_id: req.body.postId});
+            if (!post.dislikes.includes(req.body.userId)) {
+                post.dislikes.push(req.body.userId);
+            }
+            await post.save();
+            res.status(200).json(post);
         }
-        let post = await Post.findOne({_id: req.body.postId});
-        if (!post.dislikes.includes(req.body.userId)) {
-            post.dislikes.push(req.body.userId);
-        }
-        await post.save();
-        res.status(200).json(post);
     } catch (e) {
         res.status(400)
             .json({
@@ -149,13 +153,14 @@ router.post('/undislike', withAuth, async (req, res) => {
     try {
         if (req.userId !== req.body.userId) {
             res.status(403).json(false);
+        } else {
+            let post = await Post.findOne({_id: req.body.postId});
+            post.dislikes = post.dislikes.filter(elem => {
+                return !elem.equals(req.body.userId);
+            });
+            await post.save();
+            res.status(200).json(post);
         }
-        let post = await Post.findOne({_id: req.body.postId});
-        post.dislikes = post.dislikes.filter(elem => {
-            return !elem.equals(req.body.userId);
-        });
-        await post.save();
-        res.status(200).json(post);
     } catch (e) {
         res.status(400)
             .json({
@@ -168,11 +173,12 @@ router.post('/approve', withAuth, async (req, res) => {
     try {
         if (req.role !== 'admin') {
             res.status(403).json(false);
+        } else {
+            let result = await Post.updateOne({_id: req.body.postId}, {
+                isApproved: true
+            });
         }
-        let result = await Post.updateOne({_id: req.body.postId}, {
-            isApproved: true
-        });
-        res.status(200).json(true);
+        res.status(200).json(await Post.findOne({_id: req.body.postId}));
     } catch (e) {
         res.status(400)
             .json({
@@ -184,12 +190,13 @@ router.post('/approve', withAuth, async (req, res) => {
 router.delete('/', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
-        if (req.userId !== post.authorName || req.role !== 'admin') {
+        if (req.userId !== post.authorId || req.role !== 'admin') {
             res.status(403).json(false);
+        } else {
+            await S3Service.deleteImg(post.s3Key);
+            await post.delete();
+            res.status(200).json(true);
         }
-        await S3Service.deleteImg(post.s3Key);
-        await post.delete();
-        res.status(200).json(true);
     } catch (e) {
         console.log(e);
         res.status(400)
