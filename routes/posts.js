@@ -186,7 +186,7 @@ router.post('/approve', withAuth, async (req, res) => {
 router.delete('/', withAuth, async (req, res) => {
     try {
         let post = await Post.findOne({_id: req.body.postId});
-        if (req.userId !== post.authorId || req.role !== 'admin') {
+        if (req.userId !== post.authorId.toString() && req.role !== 'admin') {
             res.status(403).json(false);
         } else {
             await S3Service.deleteImg(post.s3Key);
