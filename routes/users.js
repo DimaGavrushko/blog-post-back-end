@@ -32,7 +32,7 @@ router.post('/updateProfile', withAuth, async (req, res) => {
         } else {
             let params = req.body;
 
-            if (params.name === 'email' && req.role === 'admin') {
+            if (req.userId !== req.body.userId && params.name === 'email' && req.role === 'admin') {
                 res.status(403).json(false);
             } else {
                 let result = await Users.updateOne({_id: params.userId}, {
