@@ -53,7 +53,7 @@ router.post('/updateProfile', withAuth, async (req, res) => {
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -77,7 +77,7 @@ router.post('/updateAvatar', withAuth, multerService.upload.single('img'), async
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -112,7 +112,7 @@ router.post('/updatePassword', withAuth, async (req, res) => {
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
