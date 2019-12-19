@@ -79,7 +79,7 @@ router.put('/createPost', withAuth, multerService.upload.single('img'), async (r
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -100,7 +100,7 @@ router.post('/like', withAuth, async (req, res) => {
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -120,7 +120,7 @@ router.post('/unlike', withAuth, async (req, res) => {
     } catch (e) {
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -140,7 +140,7 @@ router.post('/dislike', withAuth, async (req, res) => {
     } catch (e) {
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -160,7 +160,7 @@ router.post('/undislike', withAuth, async (req, res) => {
     } catch (e) {
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -178,7 +178,7 @@ router.post('/approve', withAuth, async (req, res) => {
     } catch (e) {
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
@@ -197,7 +197,7 @@ router.delete('/', withAuth, async (req, res) => {
         console.log(e);
         res.status(400)
             .json({
-                error: 'Bad request'
+                error: e.message
             });
     }
 });
