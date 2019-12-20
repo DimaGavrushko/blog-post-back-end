@@ -50,11 +50,16 @@ router.post('/updateProfile', withAuth, async (req, res) => {
             }
         }
     } catch (e) {
-        console.log(e);
-        res.status(400)
-            .json({
-                error: e.message
+        if (e.name === 'MongoError' && e.code === 11000) {
+            res.status(400).json({
+                error: 'Email must be unique'
             });
+        } else {
+            res.status(400)
+                .json({
+                    error: 'Bad request'
+                });
+        }
     }
 });
 
