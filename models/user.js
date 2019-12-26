@@ -6,8 +6,14 @@ const salt = bcrypt.genSaltSync(10);
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true,
-        unique: true
+        validate: [
+            function(v) {
+                return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(v);
+            },
+            'Email is not valid'
+        ],
+        required: [true, 'Email is required'],
+        unique: [true, 'Email is unique']
     },
     password: {type: String, required: true},
     role: {

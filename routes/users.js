@@ -4,6 +4,8 @@ const {withAuth} = require("../middlewares");
 const multerService = require('../services/multer');
 const S3Service = require('../services/s3');
 const Post = require('../models/post');
+const jwt = require('jsonwebtoken');
+const {secret} = require("../config");
 
 const _ = require('lodash');
 
@@ -46,20 +48,28 @@ router.post('/updateProfile', withAuth, async (req, res) => {
                 }
 
                 const updatedUser = await Users.findOne({_id: params.userId});
-                res.status(200).json(updatedUser);
+
+                if (params.name === 'email') {
+                    const payload = {
+                        id: updatedUser._id,
+                        email: updatedUser.email,
+                        role: updatedUser.role
+                    };
+                    const token = jwt.sign(payload, secret, {
+                        expiresIn: '1h'
+                    });
+                    res.status(200).cookie('token', token, {httpOnly: true}).json(updatedUser);
+                } else {
+                    res.status(200).json(updatedUser);
+                }
             }
         }
     } catch (e) {
-        if (e.name === 'MongoError' && e.code === 11000) {
-            res.status(400).json({
-                error: 'Email must be unique'
-            });
-        } else {
-            res.status(400)
-                .json({
-                    error: 'Bad request'
-                });
-        }
+        console.log(e);
+        res.status(400)
+          .json({
+              error: e.message
+          });
     }
 });
 
