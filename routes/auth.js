@@ -12,38 +12,17 @@ router.post('/login', async function (req, res) {
     try {
         let user = await userService.getUserRecord({email});
         if (user) {
-            user.isCorrectPassword(password, function (err, same) {
-                console.log(user);
-                if (err) {
-                    res.status(500)
-                        .json({
-                            error: 'Internal error please try again'
-                        });
-                } else if (!same) {
-                    res.status(401)
-                        .json({
-                            error: 'Incorrect email or password'
-                        });
-                } else {
-                    // Issue token
-                    const payload = {id: user._id, email, role: user.role};
-                    const token = jwt.sign(payload, secret, {
-                        expiresIn: '1h'
-                    });
-                    res.status(200).cookie('token', token, {httpOnly: true}).json(user);
-                }
+            await user.isCorrectPassword(password);
+            const payload = {id: user._id, email, role: user.role};
+            const token = jwt.sign(payload, secret, {
+                expiresIn: '1h'
             });
+            res.status(200).cookie('token', token, {httpOnly: true}).json(user);
         } else {
-            res.status(401)
-                .json({
-                    error: "Authentication failed"
-                });
+            res.status(401).json({ error: "Authentication failed" });
         }
     } catch (err) {
-        res.status(500)
-            .json({
-                error: err.message
-            });
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -54,8 +33,7 @@ router.post('/register', function (req, res) {
     // TODO: create user service
     user.save(function (err) {
         if (err) {
-            res.status(500)
-                .send(err.message);
+            res.status(500).send(err.message);
         } else {
             res.status(200).send("Success");
         }
@@ -77,16 +55,10 @@ router.get('/tryAuth', withAuth, async function (req, res) {
         if (user) {
             res.status(200).json(user)
         } else {
-            res.status(401)
-                .json({
-                    error: "Authentication failed"
-                });
+            res.status(401).json({ error: "Authentication failed" });
         }
     } catch (err) {
-        res.status(500)
-            .json({
-                error: err.message
-            });
+        res.status(500).json({ error: err.message });
     }
 });
 

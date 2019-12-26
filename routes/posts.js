@@ -198,7 +198,7 @@ router.delete('/', withAuth, async (req, res) => {
         res.status(400)
             .json({
                 error: e.message
-            });
+             });
     }
 });
 
