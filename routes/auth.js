@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');
 const userService = require('../services/user');
 const { withAuth } = require('../middlewares');
 const { secret } = require('../config');
@@ -29,7 +28,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/register', (req, res) => {
+/* router.post('/register', (req, res) => {
   const { email, password, role } = req.body;
   const user = new User({ email, password, role });
 
@@ -41,7 +40,7 @@ router.post('/register', (req, res) => {
       res.status(200).send('Success');
     }
   });
-});
+}); */
 
 router.get('/checkToken', withAuth, (req, res) => {
   res.sendStatus(200);

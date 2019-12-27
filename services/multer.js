@@ -1,6 +1,7 @@
+// eslint-disable-next-line import/no-self-import
 const multer = require('multer');
 
-module.exports = (function() {
+module.exports = (() => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, `${__dirname}/../uploads/tmp`);

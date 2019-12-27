@@ -21,6 +21,7 @@ const {
 const { allowedOrigins } = require('./constants');
 
 S3Service.connect(s3AccessKey, s3SecretKey, s3BucketName);
+// eslint-disable-next-line no-console
 dbService.connect(dbUser, dbUserPassword, dbName).then(console.log);
 
 app.use(helmet());
@@ -40,4 +41,5 @@ app.use(
 );
 app.use('/', router);
 
+// eslint-disable-next-line no-console
 app.listen(port, () => console.log(`Server is started on ${port}`));

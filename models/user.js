@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function preSave(next) {
   // Check if document is new or a new password has been set
   if (this.isNew || this.isModified('password')) {
     // Saving reference to this because of changing scopes
@@ -67,7 +67,7 @@ UserSchema.post('updateOne', (error, doc, next) => {
   }
 });
 
-UserSchema.methods.isCorrectPassword = async function(password) {
+UserSchema.methods.isCorrectPassword = async function isCorrect(password) {
   try {
     const same = await bcrypt.compare(password, this.password);
     if (!same) {
@@ -84,7 +84,7 @@ UserSchema.methods.encodePassword = password => bcrypt.hash(password, salt);
 
 UserSchema.path('email').validate(
   value =>
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
       value
     ),
   'Email is not valid'

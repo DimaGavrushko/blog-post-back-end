@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const fileSystem = require('./file-system');
 
-module.exports = (function() {
+module.exports = (() => {
   let s3 = null;
   let bucketName;
 
@@ -13,6 +13,7 @@ module.exports = (function() {
       });
       bucketName = _bucketName;
       s3 = new AWS.S3();
+      // eslint-disable-next-line no-console
       console.log('connected to s3');
     } catch (err) {
       throw err;
