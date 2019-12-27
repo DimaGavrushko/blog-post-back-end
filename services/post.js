@@ -55,7 +55,7 @@ async function createPost(params, file) {
         ...s3Params
       };
 
-      post = { ...post, ...newPostParams };
+      post = Object.assign(post, newPostParams);
       await updatePost(params.id, newPostParams);
     } else {
       s3Params = await S3Service.upload('posts', file.path, file.filename);
@@ -79,7 +79,7 @@ async function createPost(params, file) {
 
 async function deletePost(postId) {
   try {
-    const post = getPost(postId);
+    const post = await getPost(postId);
     await S3Service.deleteImg(post.s3Key);
     await post.delete();
   } catch (e) {
