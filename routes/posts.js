@@ -89,8 +89,8 @@ router.post('/approve', withAuth, async (req, res) => {
       res.status(403).json(false);
     } else {
       await postService.approvePost(req.body.postId);
+      res.status(200).json(await postService.getPost(req.body.postId));
     }
-    res.status(200).json(await postService.getPost(req.body.postId));
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
