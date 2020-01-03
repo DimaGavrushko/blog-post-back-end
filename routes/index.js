@@ -7,5 +7,4 @@ router.use('/auth', auth);
 router.use('/posts', posts);
 router.use('/users', users);
 
-
 module.exports = router;

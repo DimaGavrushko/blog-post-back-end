@@ -1,125 +1,73 @@
 const router = require('express').Router();
-const Users = require('../models/user');
-const {withAuth} = require("../middlewares");
+const jwt = require('jsonwebtoken');
+const { withAuth } = require('../middlewares');
 const multerService = require('../services/multer');
-const S3Service = require('../services/s3');
-const Post = require('../models/post');
+const userService = require('../services/user');
+const { secret } = require('../config');
 
-const _ = require('lodash');
-
-router.get('/:id', (req, res) => {
-    Users.findOne({_id: req.params.id}).then(obj => {
-        if (obj) {
-            const user = _.omit(obj.toObject(), ["password", "__v"]);
-            res.json(user)
-        } else {
-            res.status(404).json({
-                error: 'Not found such user'
-            })
-        }
-    })
-        .catch(err => {
-            res.status(404).json({
-                error: err.message
-            })
-        });
+router.get('/:id', async (req, res) => {
+  try {
+    res.status(200).json(await userService.getUserRecord({ _id: req.params.id }));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.post('/updateProfile', withAuth, async (req, res) => {
-    try {
-        if (req.userId !== req.body.userId && req.role !== 'admin') {
-            res.status(403).json(false);
-        } else {
-            let params = req.body;
+  const params = req.body;
 
-            if (req.userId !== req.body.userId && params.name === 'email' && req.role === 'admin') {
-                res.status(403).json(false);
-            } else {
-                let result = await Users.updateOne({_id: params.userId}, {
-                    [params.name]: params.value
-                });
+  try {
+    if (req.userId !== req.body.userId && req.role !== 'admin') {
+      res.status(403).json({ error: `You can't change ${params.name} of other user` });
+    } else if (req.userId !== req.body.userId && params.name === 'email' && req.role === 'admin') {
+      res.status(403).json({ error: `You can't change ${params.name} of other user` });
+    } else {
+      const updatedUser = await userService.updateUser(params);
 
-                if (params.name === 'firstName') {
-                    await Post.updateMany({authorId: params.userId}, {
-                        authorName: params.value
-                    });
-                }
-
-                const updatedUser = await Users.findOne({_id: params.userId});
-                res.status(200).json(updatedUser);
-            }
-        }
-    } catch (e) {
-        if (e.name === 'MongoError' && e.code === 11000) {
-            res.status(400).json({
-                error: 'Email must be unique'
-            });
-        } else {
-            res.status(400)
-                .json({
-                    error: 'Bad request'
-                });
-        }
+      if (params.name === 'email') {
+        const payload = {
+          id: updatedUser._id,
+          email: updatedUser.email,
+          role: updatedUser.role
+        };
+        const token = jwt.sign(payload, secret, {
+          expiresIn: '1h'
+        });
+        res
+          .status(200)
+          .cookie('token', token, { httpOnly: true })
+          .json(updatedUser);
+      } else {
+        res.status(200).json(updatedUser);
+      }
     }
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.post('/updateAvatar', withAuth, multerService.upload.single('img'), async (req, res) => {
-    try {
-        if (req.userId !== req.body.userId && req.role !== 'admin') {
-            res.status(403).json(false);
-        } else {
-            let user = await Users.findOne({_id: req.body.userId});
-            if (user.url) {
-                await S3Service.deleteImg(user.s3Key);
-            }
-
-            let s3Params = await S3Service.upload('avatars', req.file.path, req.file.filename);
-            await Users.updateOne({_id: req.body.userId}, s3Params);
-
-            res.status(200).json(Object.assign(user, s3Params));
-        }
-    } catch (e) {
-        console.log(e);
-        res.status(400)
-            .json({
-                error: e.message
-            });
+  try {
+    if (req.userId !== req.body.userId && req.role !== 'admin') {
+      res.status(403).json({ error: `"You·can't·change·avatar·of·other·user"` });
+    } else {
+      res.status(200).json(await userService.updateAvatar(req.body.userId, req.file));
     }
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.post('/updatePassword', withAuth, async (req, res) => {
-    let {userId, currentPassword, newPassword} = req.body;
-    try {
-        if (req.userId !== userId) {
-            res.status(403).json(false);
-        } else {
-            let user = await Users.findOne({_id: userId});
-            user.isCorrectPassword(currentPassword, async function (err, same) {
-                if (err) {
-                    res.status(500)
-                        .json({
-                            error: 'Internal error please try again'
-                        });
-                } else if (!same) {
-                    res.status(400)
-                        .json({
-                            error: 'Incorrect current password'
-                        });
-                } else {
-                    const saltPassword = await user.encodePassword(newPassword);
-                    user.password = saltPassword;
-                    await Users.updateOne({_id: userId}, {password: saltPassword});
-                    res.status(200).json(user);
-                }
-            });
-        }
-    } catch (e) {
-        console.log(e);
-        res.status(400)
-            .json({
-                error: e.message
-            });
+  try {
+    if (req.userId !== req.body.userId) {
+      res.status(403).json({ error: `"You·can't·change·avatar·of·other·user"` });
+    } else {
+      res.status(200).json(await userService.updatePassword(req.body));
     }
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 module.exports = router;
