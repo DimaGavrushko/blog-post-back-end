@@ -61,7 +61,7 @@ router.post('/updateAvatar', withAuth, multerService.upload.single('img'), async
 router.post('/updatePassword', withAuth, async (req, res) => {
   try {
     if (req.userId !== req.body.userId) {
-      res.status(403).json({ error: `"You can't change avatar of other user"` });
+      res.status(403).json({ error: `"You can't change password of other user"` });
     } else {
       res.status(200).json(await userService.updatePassword(req.body));
     }
