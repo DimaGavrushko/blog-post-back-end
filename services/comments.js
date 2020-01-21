@@ -64,7 +64,6 @@ async function createComment({ authorId, postId, content }) {
   }
 }
 
-
 module.exports = {
   getUserCommentsForPost,
   getUserComments,

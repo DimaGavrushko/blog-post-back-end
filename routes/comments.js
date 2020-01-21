@@ -8,19 +8,13 @@ router.get('/', withAuth, async (req, res) => {
     if (postId && authorId) {
       res
         .status(200)
-        .json({ comments : await commentsService.getUserCommentsForPost(postId, authorId) });
+        .json({ comments: await commentsService.getUserCommentsForPost(postId, authorId) });
     } else if (authorId) {
-      res
-        .status(200)
-        .json({ comments : await commentsService.getUserComments(authorId) });
+      res.status(200).json({ comments: await commentsService.getUserComments(authorId) });
     } else if (postId) {
-      res
-        .status(200)
-        .json({ comments : await commentsService.getPostComments(postId) });
+      res.status(200).json({ comments: await commentsService.getPostComments(postId) });
     } else {
-      res
-        .status(200)
-        .json({ comments : await commentsService.getComments({}) });
+      res.status(200).json({ comments: await commentsService.getComments({}) });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -30,7 +24,7 @@ router.get('/', withAuth, async (req, res) => {
 router.put('/create', async (req, res) => {
   try {
     if (req.role === 'guest') {
-      res.status(403).json({ error: "Invalid operation." });
+      res.status(403).json({ error: 'Invalid operation.' });
     } else {
       res.status(200).json(await commentsService.createComment(req.body));
     }
